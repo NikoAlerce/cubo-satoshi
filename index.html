@@ -175,7 +175,7 @@ img { max-width: 100%; }
         <span class="dl-k">Versión 1</span>
         <span class="dl-t">Letras caladas</span>
         <span class="dl-f">cubo_satoshi_15cm_calado.zip · 1.5 MB</span>
-        <span class="dl-n">Frase: letras de 4.4 mm, trazos de 0.7 a 0.85 mm</span>
+        <span class="dl-n">Frase al tamaño del monumento, trazos de 0.85 mm o más</span>
       </a>
       <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_relieve.zip" download>
         <span class="dl-k">Versión 2</span>
@@ -189,17 +189,6 @@ img { max-width: 100%; }
         <span class="dl-f">cubo_satoshi_15cm_sin.zip · 24 KB</span>
         <span class="dl-n">Plan B: logo y halving, sin frases</span>
       </a>
-    </div>
-    <div class="test">
-      <div class="test-txt">
-        <span class="dl-k">Antes de imprimir el cubo</span>
-        <strong>Pieza de prueba de la frase</strong>
-        <p>Un recorte de 90 × 38 mm de la cara de la frase a 15 cm, con las cuatro últimas líneas y la firma: ahí están la W, la N y la M, que tienen los trazos más finos (0.7 mm). Se imprime en plano, con las letras hacia arriba, igual que la placa entera. Ajustes sugeridos: generador de paredes Arachne, capas de 0.12 mm y sin planchado (ironing), que puede cerrar las letras.</p>
-      </div>
-      <div class="test-dl">
-        <a class="dl" href="stl/15cm/prueba/prueba_frase_calado.stl" download>prueba_frase_calado.stl</a>
-        <a class="dl" href="stl/15cm/prueba/prueba_frase_relieve.stl" download>prueba_frase_relieve.stl</a>
-      </div>
     </div>
     <div class="spec" id="spec"></div>
   </section>
@@ -248,7 +237,7 @@ img { max-width: 100%; }
     </div>
     <ul class="checks">
       <li><span class="pill ok">Cubo</span><span>150 × 150 mm y 155.6 mm de alto con la base. Paredes de 5.6 mm y calados de 1.5 mm de profundidad.</span></li>
-      <li><span class="pill warn">Letras</span><span>Tipografía Bahnschrift Bold, la misma en la frase, la firma y el techo. Frase y firma, al tamaño del monumento: letras de 4.35 mm. Medido cortando la placa, los palos tienen 0.85 mm y las diagonales de la M, la N y la W 0.7 mm, un poco por debajo de los 0.8 mm que recomiendan las guías para pico de 0.4, igual que la altura de letra (piden 5 a 6 mm). Conviene probar esa placa primero. Techo: letras de 9.9 a 11 mm con trazo de 1.9 a 2.2 mm.</span></li>
+      <li><span class="pill ok">Letras</span><span>Tipografía Bahnschrift Bold, la misma en la frase, la firma y el techo. Frase y firma al tamaño del monumento, con letras de 4.35 mm: el trazo más fino mide 0.85 mm, medido cortando la placa, por encima del mínimo de 0.8 mm para pico de 0.4. Techo: letras de 9.9 a 11 mm con trazo de 1.9 a 2.2 mm.</span></li>
       <li><span class="pill ok">Logo</span><span>49.5 mm de ancho, trazos de 2.6 mm o más y cortes de 1.5 a 1.9 mm. Líneas del halving de 1.5 mm de ancho.</span></li>
       <li><span class="pill ok">Piezas</span><span>Cuerpo 150 × 144.4 × 144.4 mm. Cara de la frase 150 × 144.4 mm y techo 150 × 150 mm, placas de 5.6 mm (7.1 mm en relieve). Base 135 × 135 × 5.6 mm. Las cuatro son mallas cerradas y suman exactamente el volumen del cubo entero.</span></li>
       <li><span class="pill ok">Puentes</span><span>Los únicos tramos en el aire son los techitos de las líneas del halving en las paredes del cuerpo, de 1.5 mm de ancho.</span></li>
@@ -329,10 +318,10 @@ img { max-width: 100%; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script>
 const VARIANTS = {
-  calado: { file: "calado.json", weight: "Hasta 854 g en PLA (792 g en resina), si va 100 % relleno",
+  calado: { file: "calado.json", weight: "Hasta 853 g en PLA (791 g en resina), si va 100 % relleno",
     text: "Las letras van grabadas 1.5 mm en la cara de la frase y en el techo, en Bahnschrift Bold. Es la opción más fiel al monumento, donde todo está calado.",
     print: "Cuatro piezas sin soporte: el cuerpo parado sobre el piso, la cara de la frase y el techo en plano con las letras hacia arriba, la base plana." },
-  relieve: { file: "relieve.json", weight: "Hasta 863 g en PLA (800 g en resina), si va 100 % relleno",
+  relieve: { file: "relieve.json", weight: "Hasta 863 g en PLA (801 g en resina), si va 100 % relleno",
     text: "Las letras sobresalen 1.5 mm. Las líneas del halving y el logo siguen calados.",
     print: "Igual que la calada: las placas con letras van en plano, con las letras hacia arriba, así que tampoco lleva soporte." },
   sin: { file: "sin.json", weight: "Hasta 858 g en PLA (796 g en resina), si va 100 % relleno",
