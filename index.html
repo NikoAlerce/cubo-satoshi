@@ -70,6 +70,26 @@ ul.checks li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-
 body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
+.downloads { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.dlbtn { display: grid; gap: 4px; padding: 18px 18px 16px; text-decoration: none; color: var(--fg);
+  background: linear-gradient(180deg, #1d2024, var(--panel)); border: 1px solid var(--line); min-width: 0;
+  transition: border-color .15s, transform .15s; }
+.dlbtn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.dlbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dl-k { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.dl-t { font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: .03em; text-transform: uppercase; line-height: 1.05; }
+.dl-t::after { content: "  \2193"; color: var(--accent); }
+.dl-f { font-family: var(--mono); font-size: 12px; color: var(--fg); word-break: break-all; }
+.dl-n { font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .dlbtn { transition: none; } .dlbtn:hover { transform: none; } }
+.howto { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.howto figure { background: var(--panel); border: 1px solid var(--line); padding: 14px; gap: 10px; align-content: start; }
+.howto figcaption { font-family: var(--body); font-size: 14px; color: var(--muted); display: grid; gap: 6px; }
+.howto strong { color: var(--fg); font-weight: 500; }
+.dg { width: 100%; height: auto; display: block; }
+.dg-t { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.pill.bad { color: #ff6b5e; }
+.note a { color: var(--fg); }
 </style>
 </head>
 <body>
@@ -79,8 +99,49 @@ img { max-width: 100%; }
   <header>
     <span class="eyebrow">Somos Génesis · souvenir impreso en 3D · revisión antes de imprimir</span>
     <h1>Cubo Satoshi</h1>
-    <p>Las tres piezas que pidió Clau, en tamaño real de 80 mm. Arrastrá para girar el cubo y pellizcá o usá la rueda para acercarte a las letras.</p>
+    <p>Las tres versiones en STL, en milímetros y a tamaño real (80 mm). Abajo podés girar cada una en 3D: arrastrá para rotar y pellizcá o usá la rueda para acercarte a las letras.</p>
   </header>
+
+  <section class="downloads" aria-label="Descargas">
+    <a class="dlbtn" href="stl/cubo_satoshi_calado_print.stl" download>
+      <span class="dl-k">Versión 1</span>
+      <span class="dl-t">Letras caladas</span>
+      <span class="dl-f">cubo_satoshi_calado_print.stl · 3.2 MB</span>
+      <span class="dl-n">Acostado sobre la cara de atrás, sin soportes. La frase necesita resina o boquilla 0.2</span>
+    </a>
+    <a class="dlbtn" href="stl/cubo_satoshi_relieve.stl" download>
+      <span class="dl-k">Versión 2</span>
+      <span class="dl-t">Letras en relieve</span>
+      <span class="dl-f">cubo_satoshi_relieve.stl · 3.2 MB</span>
+      <span class="dl-n">Viene parado, la orientación la elegís vos</span>
+    </a>
+    <a class="dlbtn" href="stl/cubo_satoshi_sin_print.stl" download>
+      <span class="dl-k">Versión 3</span>
+      <span class="dl-t">Sin letras</span>
+      <span class="dl-f">cubo_satoshi_sin_print.stl · 63 KB</span>
+      <span class="dl-n">Plan B: logo y halving, sin frases</span>
+    </a>
+  </section>
+
+
+  <section class="section" aria-label="Cómo se imprime">
+    <h2>Cómo se apoya en la impresora</h2>
+    <p>El cubo es hueco y tiene una cara abierta. Eso define cómo conviene ponerlo en la cama de la impresora, y por eso la versión en relieve se imprime distinto a las otras dos.</p>
+    <div class="howto">
+      <figure>
+        <svg viewBox="0 0 220 170" role="img" class="dg"><rect x="10" y="150" width="200" height="8" fill="var(--line)"/><path d="M60 150 V60 M160 150 V60" stroke="var(--fg)" stroke-width="8" fill="none"/><rect x="56" y="140" width="108" height="10" fill="var(--fg)"/><path d="M60 60 H160" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/><text x="110" y="50" text-anchor="middle" class="dg-t">abierto</text><text x="110" y="135" text-anchor="middle" class="dg-t">frase calada</text></svg>
+        <figcaption><span class="pill ok">Sin soportes</span><strong>Acostado sobre la cara de atrás.</strong> El hueco queda hacia arriba y todas las paredes suben derechas, así que no hace falta ningún soporte. La cara que apoya es la de la frase. Si las letras están caladas, esa cara sigue siendo plana. Lo único que queda en el aire es el costado de la base, un voladizo de 3 mm que normalmente sale bien. Así vienen preparados los archivos de las versiones 1 y 3.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 220 170" role="img" class="dg"><rect x="10" y="150" width="200" height="8" fill="var(--line)"/><path d="M60 146 V56 M160 146 V56" stroke="var(--fg)" stroke-width="8" fill="none"/><rect x="56" y="52" width="108" height="10" fill="var(--fg)"/><rect x="70" y="146" width="80" height="4" fill="var(--fg)"/><path d="M76 146 V64" stroke="var(--accent)" stroke-width="2"/><path d="M88 146 V64" stroke="var(--accent)" stroke-width="2"/><path d="M100 146 V64" stroke="var(--accent)" stroke-width="2"/><path d="M112 146 V64" stroke="var(--accent)" stroke-width="2"/><path d="M124 146 V64" stroke="var(--accent)" stroke-width="2"/><path d="M136 146 V64" stroke="var(--accent)" stroke-width="2"/><path d="M148 146 V64" stroke="var(--accent)" stroke-width="2"/><text x="110" y="44" text-anchor="middle" class="dg-t">techo en el aire</text></svg>
+        <figcaption><span class="pill warn">Con soportes</span><strong>Parado sobre su base.</strong> Se ve como el monumento, pero el techo queda en el aire sobre el hueco: es un puente de 74 mm. También queda en el aire el borde del cubo alrededor de la base, que sobresale 4 mm. La impresora no puede hacerlo sin soportes adentro, que después hay que sacar por la cara abierta.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 220 170" role="img" class="dg"><rect x="10" y="150" width="200" height="8" fill="var(--line)"/><g transform="rotate(-6 110 140)"><path d="M60 136 V46 M160 136 V46" stroke="var(--fg)" stroke-width="8" fill="none"/><rect x="56" y="126" width="108" height="10" fill="var(--fg)"/><rect x="66" y="136" width="6" height="7" fill="var(--warn)"/><rect x="80" y="136" width="6" height="7" fill="var(--warn)"/><rect x="94" y="136" width="6" height="7" fill="var(--warn)"/><rect x="108" y="136" width="6" height="7" fill="var(--warn)"/><rect x="122" y="136" width="6" height="7" fill="var(--warn)"/><rect x="136" y="136" width="6" height="7" fill="var(--warn)"/><rect x="150" y="136" width="6" height="7" fill="var(--warn)"/></g><text x="110" y="34" text-anchor="middle" class="dg-t">apoya solo en las letras</text></svg>
+        <figcaption><span class="pill warn">No funciona</span><strong>Relieve acostado sobre la frase.</strong> Con las letras en relieve, la cara de atrás deja de ser plana: las letras sobresalen 0.8 mm, así que solo apoyarían ellas y la pieza quedaría torcida. Por eso la versión 2 se imprime parada o de costado, y la posición la elige Clau según su máquina.</figcaption>
+      </figure>
+    </div>
+  </section>
 
   <section class="section" aria-label="Visor 3D">
     <div class="switch" role="group" aria-label="Variante">
@@ -97,7 +158,7 @@ img { max-width: 100%; }
         <button id="cam-roof" data-cam="roof">Techo</button>
       </div>
       <div class="status" id="status">Cargando modelo…</div>
-      <span class="hint">80 × 80 × 83 mm · acero simulado</span>
+      <span class="hint">80 × 80 × 83 mm · acero cepillado simulado</span>
     </div>
     <div class="halo" aria-hidden="true"></div>
     <div class="spec" id="spec"></div>
@@ -114,41 +175,35 @@ img { max-width: 100%; }
   </section>
 
 
-  <section class="section" aria-label="Archivos">
-    <h2>Archivos para imprimir</h2>
-    <p>Los STL están en milímetros. Calado y sin letras vienen acostados sobre la cara de atrás, con la abertura hacia arriba, y no llevan soportes. El de relieve viene parado.</p>
-    <div class="spec">
-      <div><span class="k">Letras caladas</span><a class="dl" href="stl/cubo_satoshi_calado_print.stl" download>cubo_satoshi_calado_print.stl</a></div>
-      <div><span class="k">Letras en relieve</span><a class="dl" href="stl/cubo_satoshi_relieve.stl" download>cubo_satoshi_relieve.stl</a></div>
-      <div><span class="k">Sin letras</span><a class="dl" href="stl/cubo_satoshi_sin_print.stl" download>cubo_satoshi_sin_print.stl</a></div>
-    </div>
-  </section>
-
   <section class="section" aria-label="Chequeo técnico">
     <h2>Chequeo de imprimibilidad</h2>
     <ul class="checks">
-      <li><span class="pill ok">OK</span><span>Las tres mallas están cerradas y son manifold: 0 aristas abiertas y 0 geometría suelta. Las unidades son milímetros.</span></li>
-      <li><span class="pill ok">OK</span><span>Paredes de 3 mm. Grabados de 0.8 mm de profundidad. Juntas del halving de 0.8 mm de ancho.</span></li>
-      <li><span class="pill ok">OK</span><span>El logo tiene trazos de ~1.4 mm y cortes stencil de ~0.9 mm, así que sale bien en FDM y en resina.</span></li>
-      <li><span class="pill ok">OK</span><span>El techo tiene letras de ~6 mm de alto, legibles en cualquier tecnología.</span></li>
-      <li><span class="pill warn">Riesgo</span><span>La frase del whitepaper tiene letras de ~3 mm con trazos de ~0.5 mm. En resina sale bien. En FDM con boquilla 0.4 está al límite, y para eso sirve la prueba de un sector.</span></li>
-      <li><span class="pill warn">Ojo</span><span>La versión en relieve no se puede apoyar sobre la cara de la frase. Necesita otra orientación con soportes, y eso lo decide Clau.</span></li>
+      <li><span class="pill ok">OK</span><span>Las tres mallas están cerradas y son manifold: 0 aristas abiertas y 0 geometría suelta. Medidas en milímetros: 80 × 80 mm, 83 mm de alto con la base.</span></li>
+      <li><span class="pill ok">OK</span><span>Paredes de 3 mm. Todo lo calado tiene 0.8 mm de profundidad. Las líneas del halving miden 0.8 mm de ancho, justo el mínimo recomendado para FDM con boquilla 0.4 (el doble del diámetro de la boquilla).</span></li>
+      <li><span class="pill ok">OK</span><span>Logo de 26.4 × 24.1 mm: el trazo más fino mide 1.4 mm y el corte más angosto, donde se cruza el 8, 0.9 mm. Sale en FDM y en resina.</span></li>
+      <li><span class="pill ok">OK</span><span>Techo: letras de 8.1 a 9.2 mm de alto con trazo de 1.2 a 1.3 mm. Superan el mínimo para boquilla 0.4 (trazo de 0.8 mm y letra de 5 a 6 mm).</span></li>
+      <li><span class="pill bad">No sale en FDM 0.4</span><span>Frase del whitepaper: letras de 3.3 mm con trazo de 0.47 mm. Firma: letras de 4.1 mm con trazo de 0.58 mm. Las dos están por debajo del mínimo de una boquilla 0.4, que pide trazo de 0.8 mm, así que esas letras se van a empastar. Además la frase queda en la cara que apoya en la cama, donde la primera capa se aplasta (pata de elefante) y cierra los calados finos.</span></li>
+      <li><span class="pill ok">Resina</span><span>En resina la frase sí sale: los fabricantes piden calados de 0.15 a 0.4 mm como mínimo, y la frase tiene 0.47 mm.</span></li>
+      <li><span class="pill warn">Boquilla 0.2</span><span>Con boquilla 0.2 en FDM el trazo mínimo es 0.4 mm, así que la frase entra justo. Conviene usar el generador de paredes Arachne y capas de 0.08 a 0.12 mm, y probar antes un sector de la cara de la frase.</span></li>
+      <li><span class="pill warn">Base</span><span>En la posición sin soportes queda un solo voladizo: el costado del zócalo de la base, que sobresale 3 mm en el aire. Un voladizo de 3 mm normalmente sale sin soporte, aunque puede caer un poco por debajo.</span></li>
     </ul>
+    <p class="note">Mínimos tomados de la <a href="https://www.namestl.com/3d-printed-text-size-guide">guía de tamaño de texto por boquilla</a>, la <a href="https://pocc-techpark.media.uconn.edu/wp-content/uploads/sites/2880/2020/10/formlabs-design-guide.pdf">guía de diseño de Formlabs</a> y el foro de Prusa sobre <a href="https://forum.prusa3d.com/forum/prusaslicer/elephant-foot-compensation-not-working/">texto calado en la cara de abajo</a>. Las medidas de las piezas están tomadas de los STL.</p>
   </section>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 <script>
 const VARIANTS = {
-  calado: { file: "calado.json", weight: "129 g PLA · 120 g resina",
+  calado: { file: "calado.json", weight: "Hasta 129 g en PLA (120 g en resina), si va 100 % relleno",
     text: "Las letras van grabadas 0.8 mm en la frase de atrás y en el techo. Es la opción más fiel al monumento, donde todo está calado.",
     print: "Viene orientado en cubo_satoshi_calado_print.stl: acostado sobre la cara de atrás, con la cara abierta hacia arriba. No lleva soportes." },
-  relieve: { file: "relieve.json", weight: "131 g PLA · 122 g resina",
+  relieve: { file: "relieve.json", weight: "Hasta 131 g en PLA (122 g en resina), si va 100 % relleno",
     text: "Las letras sobresalen 0.8 mm. Las juntas del halving y el logo siguen grabados.",
-    print: "Hay que imprimirlo parado o de costado, con soporte. La frase no puede ir contra la cama." },
-  sin: { file: "sin.json", weight: "130 g PLA · 121 g resina",
+    print: "Parado sobre la base con soporte bajo el techo, o de costado. No se puede acostar sobre la frase porque las letras sobresalen." },
+  sin: { file: "sin.json", weight: "Hasta 130 g en PLA (121 g en resina), si va 100 % relleno",
     text: "Sin frases. Conserva el logo ∞/21M, la espiral de halving y las juntas. Es el plan B si las letras no se leen.",
     print: "Viene orientado en cubo_satoshi_sin_print.stl, sin soportes." },
 };
@@ -164,30 +219,102 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.physicallyCorrectLights = true;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0c0e);
+// Soft studio room for the steel to reflect: without it, metal renders as flat dark grey.
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
 const camera = new THREE.PerspectiveCamera(30, 1.6, 1, 2000);
 const controls = new THREE.OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.target.set(0, 41, 0);
 controls.minDistance = 60; controls.maxDistance = 600;
+controls.maxPolarAngle = Math.PI * 0.53;
 
-// Studio lights that read the engraving: a warm key from the front-left, a cold rim, an orange underglow.
-scene.add(new THREE.HemisphereLight(0xcfd6e0, 0x101114, 0.55));
-const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(-160, 260, 220); scene.add(key);
-const rim = new THREE.DirectionalLight(0xbcd0ff, 0.9); rim.position.set(260, 180, -160); scene.add(rim);
-const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(200, 60, 240); scene.add(fill);
-const glow = new THREE.PointLight(0xf7931a, 1.2, 160); glow.position.set(0, 2, 0); scene.add(glow);
-const floor = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color: 0x0d0e10, roughness: 0.35, metalness: 0.2 }));
+// A raking key from high left draws the edges of every groove; a cool rim separates the cube from the dark.
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-200, 260, 160); scene.add(key);
+const rim = new THREE.DirectionalLight(0xc8d6ff, 1.2); rim.position.set(240, 160, -220); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xdde3ea, 0x0c0d10, 0.35));
+
+// Floor: dark lacquer with a soft contact shadow, as in the monument video.
+const floor = new THREE.Mesh(new THREE.CircleGeometry(600, 96),
+  new THREE.MeshStandardMaterial({ color: 0x08090b, roughness: 0.22, metalness: 0.0 }));
 floor.rotation.x = -Math.PI / 2; scene.add(floor);
+function radialTexture(stops) {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const g = c.getContext("2d"), grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  for (const [t, col] of stops) grd.addColorStop(t, col);
+  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+}
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(150, 150), new THREE.MeshBasicMaterial({
+  map: radialTexture([[0, "rgba(0,0,0,0.85)"], [0.45, "rgba(0,0,0,0.5)"], [1, "rgba(0,0,0,0)"]]), transparent: true, depthWrite: false }));
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.05; scene.add(shadow);
+// The light strip under the floating cube.
+const halo = new THREE.Mesh(new THREE.PlaneGeometry(130, 130), new THREE.MeshBasicMaterial({
+  map: radialTexture([[0, "rgba(247,147,26,0.55)"], [0.38, "rgba(247,147,26,0.25)"], [0.7, "rgba(247,147,26,0)"]]),
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+halo.rotation.x = -Math.PI / 2; halo.position.y = 0.1; scene.add(halo);
 
-const steel = new THREE.MeshStandardMaterial({ color: 0xb9bdc3, metalness: 0.75, roughness: 0.32, flatShading: true });
+// Brushed finish: fine horizontal streaks, used as colour and roughness.
+function brushedTexture() {
+  const c = document.createElement("canvas"); c.width = c.height = 1024;
+  const g = c.getContext("2d");
+  g.fillStyle = "#b8b8b8"; g.fillRect(0, 0, 1024, 1024);
+  for (let i = 0; i < 5000; i++) {
+    const y = Math.random() * 1024, v = 150 + Math.random() * 90 | 0;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.15 + Math.random() * 0.35})`;
+    g.lineWidth = Math.random() < 0.9 ? 1 : 2;
+    const x = Math.random() * 1024, len = 200 + Math.random() * 900;
+    g.beginPath(); g.moveTo(x - len / 2, y); g.lineTo(x + len / 2, y); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+const brushed = brushedTexture();
+const steel = new THREE.MeshStandardMaterial({
+  color: 0xffffff, vertexColors: true, metalness: 1.0, roughness: 0.42,
+  map: brushed, roughnessMap: brushed, envMapIntensity: 1.15 });
+
+// Box-project UVs so the brushing runs horizontally on every face, and paint whatever sits
+// inside an engraving (0.03–1.2 mm under a face of the cube) almost black, like the monument.
+const H = 40, TOP = 83, STEEL = [0.86, 0.87, 0.89], RECESS = [0.05, 0.05, 0.055];
+function prepare(mesh) {
+  const g = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
+  const pos = g.attributes.position, n = pos.count;
+  const uv = new Float32Array(n * 2), col = new Float32Array(n * 3);
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  const ab = new THREE.Vector3(), cb = new THREE.Vector3();
+  for (let i = 0; i < n; i += 3) {
+    a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2);
+    const nrm = cb.subVectors(c, b).cross(ab.subVectors(a, b)).normalize();
+    const cx = (a.x + b.x + c.x) / 3, cy = (a.y + b.y + c.y) / 3, cz = (a.z + b.z + c.z) / 3;
+    const depth = [H - Math.abs(cx), H - Math.abs(cz), TOP - cy];
+    const onFace = depth.some((d) => Math.abs(d) < 0.03);
+    const inGroove = !onFace && cy > 3.5 && depth.some((d) => d > 0.03 && d < 1.2);
+    const rgb = inGroove ? RECESS : STEEL;
+    const ax = Math.abs(nrm.x), ay = Math.abs(nrm.y), az = Math.abs(nrm.z);
+    for (const [k, p] of [[i, a], [i + 1, b], [i + 2, c]]) {
+      const [u, v] = ay > ax && ay > az ? [p.x, p.z] : ax > az ? [p.z, p.y] : [p.x, p.y];
+      uv[k * 2] = u / 80; uv[k * 2 + 1] = v / 80;
+      col.set(rgb, k * 3);
+    }
+  }
+  g.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  mesh.geometry = g;
+  mesh.material = steel;
+}
+
 const loader = new THREE.GLTFLoader();
 const cache = {};
 let current = null;
 
 // Blender exports Z-up mm → glTF Y-up mm, so the cube already stands on its base.
-const CAMS = { tq: [140, 70, 160], logo: [230, 41, 0.01], quote: [0.01, 41, -230], roof: [0.01, 260, 60] };
+const CAMS = { tq: [140, 70, 160], logo: [230, 45, 0.01], quote: [0.01, 45, -230], roof: [0.01, 260, 60] };
 function setCam(name) {
   const [x, y, z] = CAMS[name];
   camera.position.set(x, y, z);
@@ -200,7 +327,7 @@ function show(v) {
   const d = VARIANTS[v];
   document.getElementById("spec").innerHTML =
     `<div><span class="k">Qué cambia</span><span class="note">${d.text}</span></div>` +
-    `<div><span class="k">Peso macizo estimado</span><span class="v">${d.weight}</span></div>` +
+    `<div><span class="k">Peso máximo</span><span class="v">${d.weight}</span></div>` +
     `<div><span class="k">Orientación de impresión</span><span class="note">${d.print}</span></div>`;
   document.getElementById("renders").innerHTML = RENDERS[v].map(([src, cap]) =>
     `<figure><img src="${src}" alt="${cap}" loading="lazy"><figcaption>${cap}</figcaption></figure>`).join("");
@@ -209,7 +336,7 @@ function show(v) {
   if (cache[v]) return use(cache[v]);
   statusEl.hidden = false; statusEl.textContent = "Cargando modelo…";
   loader.load(d.file, (gltf) => {
-    gltf.scene.traverse((o) => { if (o.isMesh) o.material = steel; });
+    gltf.scene.traverse((o) => { if (o.isMesh) prepare(o); });
     cache[v] = gltf.scene; use(gltf.scene);
   }, undefined, () => { statusEl.textContent = "No se pudo cargar el modelo. Recargá la página."; });
 }
