@@ -194,7 +194,6 @@ img { max-width: 100%; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 <script>
 const VARIANTS = {
   calado: { file: "calado.json", weight: "Hasta 129 g en PLA (120 g en resina), si va 100 % relleno",
@@ -219,13 +218,31 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.0;
 renderer.physicallyCorrectLights = true;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0c0e);
 // Soft studio room for the steel to reflect: without it, metal renders as flat dark grey.
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+// Product-photo studio for the mirror steel to reflect: a dark room with big soft boxes.
+function studio() {
+  const env = new THREE.Scene();
+  env.add(new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100),
+    new THREE.MeshBasicMaterial({ color: 0x15161a, side: THREE.BackSide })));
+  const panel = (w, h, pos, intensity) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 1, 1).multiplyScalar(intensity), side: THREE.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0, 0, 0); env.add(m);
+  };
+  panel(50, 50, [0, 49, 0], 0.55);      // overhead soft box
+  panel(10, 70, [-49, 5, 10], 1.6);    // tall strip, left
+  panel(10, 70, [49, 5, -10], 1.1);    // tall strip, right
+  panel(30, 24, [-25, 10, 49], 0.9);   // key box, front left
+  panel(30, 24, [25, 10, -49], 0.5);   // back fill
+  panel(100, 8, [0, -30, 49], 0.3);    // low bounce card
+  return pmrem.fromScene(env, 0.02).texture;
+}
+scene.environment = studio();
 const camera = new THREE.PerspectiveCamera(30, 1.6, 1, 2000);
 const controls = new THREE.OrbitControls(camera, canvas);
 controls.enableDamping = true;
@@ -262,10 +279,10 @@ halo.rotation.x = -Math.PI / 2; halo.position.y = 0.1; scene.add(halo);
 function brushedTexture() {
   const c = document.createElement("canvas"); c.width = c.height = 1024;
   const g = c.getContext("2d");
-  g.fillStyle = "#b8b8b8"; g.fillRect(0, 0, 1024, 1024);
+  g.fillStyle = "#d4d4d4"; g.fillRect(0, 0, 1024, 1024);
   for (let i = 0; i < 5000; i++) {
-    const y = Math.random() * 1024, v = 150 + Math.random() * 90 | 0;
-    g.strokeStyle = `rgba(${v},${v},${v},${0.15 + Math.random() * 0.35})`;
+    const y = Math.random() * 1024, v = 196 + Math.random() * 44 | 0;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.08 + Math.random() * 0.17})`;
     g.lineWidth = Math.random() < 0.9 ? 1 : 2;
     const x = Math.random() * 1024, len = 200 + Math.random() * 900;
     g.beginPath(); g.moveTo(x - len / 2, y); g.lineTo(x + len / 2, y); g.stroke();
@@ -276,12 +293,12 @@ function brushedTexture() {
 }
 const brushed = brushedTexture();
 const steel = new THREE.MeshStandardMaterial({
-  color: 0xffffff, vertexColors: true, metalness: 1.0, roughness: 0.42,
-  map: brushed, roughnessMap: brushed, envMapIntensity: 1.15 });
+  color: 0xffffff, vertexColors: true, metalness: 1.0, roughness: 0.07,
+  map: brushed, roughnessMap: brushed, envMapIntensity: 1.0 });
 
 // Box-project UVs so the brushing runs horizontally on every face, and paint whatever sits
 // inside an engraving (0.03–1.2 mm under a face of the cube) almost black, like the monument.
-const H = 40, TOP = 83, STEEL = [0.86, 0.87, 0.89], RECESS = [0.05, 0.05, 0.055];
+const H = 40, TOP = 83, STEEL = [0.95, 0.96, 0.97], RECESS = [0.04, 0.04, 0.045];
 function prepare(mesh) {
   const g = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
   const pos = g.attributes.position, n = pos.count;
@@ -291,10 +308,15 @@ function prepare(mesh) {
   for (let i = 0; i < n; i += 3) {
     a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2);
     const nrm = cb.subVectors(c, b).cross(ab.subVectors(a, b)).normalize();
-    const cx = (a.x + b.x + c.x) / 3, cy = (a.y + b.y + c.y) / 3, cz = (a.z + b.z + c.z) / 3;
-    const depth = [H - Math.abs(cx), H - Math.abs(cz), TOP - cy];
-    const onFace = depth.some((d) => Math.abs(d) < 0.03);
-    const inGroove = !onFace && cy > 3.5 && depth.some((d) => d > 0.03 && d < 1.2);
+    // Depth of each corner under each outer face (x sides, z sides, roof). A triangle is in an
+    // engraving when all three corners sit within 1.2 mm under the same face and it is not on it.
+    const depths = (p) => [H - Math.abs(p.x), H - Math.abs(p.z), TOP - p.y];
+    const da = depths(a), db = depths(b), dc = depths(c);
+    const minY = Math.min(a.y, b.y, c.y);
+    const inGroove = minY > 3.5 && [0, 1, 2].some((k) => {
+      const ds = [da[k], db[k], dc[k]];
+      return ds.every((d) => d > -0.03 && d < 1.2) && Math.max(...ds) > 0.03;
+    });
     const rgb = inGroove ? RECESS : STEEL;
     const ax = Math.abs(nrm.x), ay = Math.abs(nrm.y), az = Math.abs(nrm.z);
     for (const [k, p] of [[i, a], [i + 1, b], [i + 2, c]]) {
