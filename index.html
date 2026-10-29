@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Souvenir impreso en 3D del monumento Somos Génesis a Satoshi Nakamoto: visor 3D y archivos de las tres variantes.">
+<title>Cubo Satoshi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Barlow:wght@400;500&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: one dark showroom column, like the monument video — the model on a black floor,
+   variant switch above it, a spec sheet under it, then the side-by-side fidelity check. */
+:root {
+  --bg: #0b0c0e;          /* video black */
+  --panel: #15171a;       /* graphite plate */
+  --line: #2a2d32;        /* engraved seam */
+  --fg: #e6e7e9;          /* brushed steel highlight */
+  --muted: #8d939b;       /* steel in shadow */
+  --accent: #f7931a;      /* the orange halo under the cube */
+  --ok: #5fbf7f;
+  --warn: #e3b341;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--fg); }
+body { font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 36px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(36px, 7vw, 60px); line-height: 1; letter-spacing: .02em; margin: 0; text-transform: uppercase; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: .03em; text-transform: uppercase; margin: 0; }
+p { margin: 0; max-width: 65ch; color: var(--muted); }
+.switch { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); width: fit-content; max-width: 100%; }
+.switch button { font-family: var(--display); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  background: transparent; color: var(--muted); border: 0; border-right: 1px solid var(--line); padding: 10px 18px; cursor: pointer; }
+.switch button:last-child { border-right: 0; }
+.switch button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.switch button:focus-visible, .views button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { position: relative; aspect-ratio: 16 / 10; max-width: 100%; background: radial-gradient(ellipse at 50% 85%, #1b1d21 0%, var(--bg) 70%); border: 1px solid var(--line); overflow: hidden; }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.stage .hint { position: absolute; left: 12px; bottom: 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); pointer-events: none; }
+.stage .status { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.views { position: absolute; right: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.views button { font-family: var(--mono); font-size: 11px; background: rgba(11,12,14,.7); color: var(--fg); border: 1px solid var(--line); padding: 6px 9px; cursor: pointer; }
+.spec { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.spec > div { background: var(--panel); padding: 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.k { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.v { font-family: var(--display); font-size: 22px; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.note { font-size: 14px; color: var(--muted); }
+.pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid currentColor; width: fit-content; }
+.pill.ok { color: var(--ok); } .pill.warn { color: var(--warn); }
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figure img { width: 100%; display: block; border: 1px solid var(--line); background: #000; }
+figcaption { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.section { display: grid; gap: 16px; }
+.halo { height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .7; }
+ul.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+ul.checks li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: baseline; }
+@media (max-width: 520px) { ul.checks li { grid-template-columns: 1fr; gap: 4px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+.dl { color: var(--accent); font-family: var(--mono); font-size: 13px; word-break: break-all; }
+.dl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Somos Génesis · souvenir impreso en 3D · revisión antes de imprimir</span>
+    <h1>Cubo Satoshi</h1>
+    <p>Las tres piezas que pidió Clau, en tamaño real de 80 mm. Arrastrá para girar el cubo y pellizcá o usá la rueda para acercarte a las letras.</p>
+  </header>
+
+  <section class="section" aria-label="Visor 3D">
+    <div class="switch" role="group" aria-label="Variante">
+      <button id="v-calado" data-v="calado" aria-pressed="true">Letras caladas</button>
+      <button id="v-relieve" data-v="relieve" aria-pressed="false">Letras en relieve</button>
+      <button id="v-sin" data-v="sin" aria-pressed="false">Sin letras</button>
+    </div>
+    <div class="stage">
+      <canvas id="c"></canvas>
+      <div class="views" role="group" aria-label="Vista">
+        <button id="cam-tq" data-cam="tq">3/4</button>
+        <button id="cam-logo" data-cam="logo">Logo</button>
+        <button id="cam-quote" data-cam="quote">Frase</button>
+        <button id="cam-roof" data-cam="roof">Techo</button>
+      </div>
+      <div class="status" id="status">Cargando modelo…</div>
+      <span class="hint">80 × 80 × 83 mm · acero simulado</span>
+    </div>
+    <div class="halo" aria-hidden="true"></div>
+    <div class="spec" id="spec"></div>
+  </section>
+
+  <section class="section" aria-label="Fidelidad">
+    <h2>Fidelidad con el monumento</h2>
+    <p>Arriba está el frame del video del monumento y abajo el render de la pieza con el mismo ángulo. Compará la posición del logo ∞/21M, la espiral de halving y la base que hace flotar el cubo.</p>
+    <figure>
+      <img src="ref_video.jpg" alt="Frame del video del monumento: cubo de acero con la cara abierta, el logo y la espiral de halving" loading="lazy">
+      <figcaption>Video del monumento (Premio Bitcoin Arte, ganador 2025)</figcaption>
+    </figure>
+    <div class="compare" id="renders"></div>
+  </section>
+
+
+  <section class="section" aria-label="Archivos">
+    <h2>Archivos para imprimir</h2>
+    <p>Los STL están en milímetros. Calado y sin letras vienen acostados sobre la cara de atrás, con la abertura hacia arriba, y no llevan soportes. El de relieve viene parado.</p>
+    <div class="spec">
+      <div><span class="k">Letras caladas</span><a class="dl" href="stl/cubo_satoshi_calado_print.stl" download>cubo_satoshi_calado_print.stl</a></div>
+      <div><span class="k">Letras en relieve</span><a class="dl" href="stl/cubo_satoshi_relieve.stl" download>cubo_satoshi_relieve.stl</a></div>
+      <div><span class="k">Sin letras</span><a class="dl" href="stl/cubo_satoshi_sin_print.stl" download>cubo_satoshi_sin_print.stl</a></div>
+    </div>
+  </section>
+
+  <section class="section" aria-label="Chequeo técnico">
+    <h2>Chequeo de imprimibilidad</h2>
+    <ul class="checks">
+      <li><span class="pill ok">OK</span><span>Las tres mallas están cerradas y son manifold: 0 aristas abiertas y 0 geometría suelta. Las unidades son milímetros.</span></li>
+      <li><span class="pill ok">OK</span><span>Paredes de 3 mm. Grabados de 0.8 mm de profundidad. Juntas del halving de 0.8 mm de ancho.</span></li>
+      <li><span class="pill ok">OK</span><span>El logo tiene trazos de ~1.4 mm y cortes stencil de ~0.9 mm, así que sale bien en FDM y en resina.</span></li>
+      <li><span class="pill ok">OK</span><span>El techo tiene letras de ~6 mm de alto, legibles en cualquier tecnología.</span></li>
+      <li><span class="pill warn">Riesgo</span><span>La frase del whitepaper tiene letras de ~3 mm con trazos de ~0.5 mm. En resina sale bien. En FDM con boquilla 0.4 está al límite, y para eso sirve la prueba de un sector.</span></li>
+      <li><span class="pill warn">Ojo</span><span>La versión en relieve no se puede apoyar sobre la cara de la frase. Necesita otra orientación con soportes, y eso lo decide Clau.</span></li>
+    </ul>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const VARIANTS = {
+  calado: { file: "calado.json", weight: "129 g PLA · 120 g resina",
+    text: "Las letras van grabadas 0.8 mm en la frase de atrás y en el techo. Es la opción más fiel al monumento, donde todo está calado.",
+    print: "Viene orientado en cubo_satoshi_calado_print.stl: acostado sobre la cara de atrás, con la cara abierta hacia arriba. No lleva soportes." },
+  relieve: { file: "relieve.json", weight: "131 g PLA · 122 g resina",
+    text: "Las letras sobresalen 0.8 mm. Las juntas del halving y el logo siguen grabados.",
+    print: "Hay que imprimirlo parado o de costado, con soporte. La frase no puede ir contra la cama." },
+  sin: { file: "sin.json", weight: "130 g PLA · 121 g resina",
+    text: "Sin frases. Conserva el logo ∞/21M, la espiral de halving y las juntas. Es el plan B si las letras no se leen.",
+    print: "Viene orientado en cubo_satoshi_sin_print.stl, sin soportes." },
+};
+const RENDERS = {
+  calado: [["calado_three_quarter.jpg", "Calado · mismo ángulo que el video"], ["calado_logo.jpg", "Calado · cara del logo"], ["calado_quote.jpg", "Calado · frase del whitepaper"], ["calado_roof.jpg", "Calado · techo"]],
+  relieve: [["relieve_three_quarter.jpg", "Relieve · 3/4"], ["relieve_quote.jpg", "Relieve · frase del whitepaper"], ["relieve_roof.jpg", "Relieve · techo"]],
+  sin: [["sin_three_quarter.jpg", "Sin letras · 3/4"], ["sin_quote.jpg", "Sin letras · cara de atrás"], ["sin_roof.jpg", "Sin letras · techo"]],
+};
+
+const canvas = document.getElementById("c");
+const statusEl = document.getElementById("status");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0c0e);
+const camera = new THREE.PerspectiveCamera(30, 1.6, 1, 2000);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.target.set(0, 41, 0);
+controls.minDistance = 60; controls.maxDistance = 600;
+
+// Studio lights that read the engraving: a warm key from the front-left, a cold rim, an orange underglow.
+scene.add(new THREE.HemisphereLight(0xcfd6e0, 0x101114, 0.55));
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(-160, 260, 220); scene.add(key);
+const rim = new THREE.DirectionalLight(0xbcd0ff, 0.9); rim.position.set(260, 180, -160); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(200, 60, 240); scene.add(fill);
+const glow = new THREE.PointLight(0xf7931a, 1.2, 160); glow.position.set(0, 2, 0); scene.add(glow);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color: 0x0d0e10, roughness: 0.35, metalness: 0.2 }));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+
+const steel = new THREE.MeshStandardMaterial({ color: 0xb9bdc3, metalness: 0.75, roughness: 0.32, flatShading: true });
+const loader = new THREE.GLTFLoader();
+const cache = {};
+let current = null;
+
+// Blender exports Z-up mm → glTF Y-up mm, so the cube already stands on its base.
+const CAMS = { tq: [140, 70, 160], logo: [230, 41, 0.01], quote: [0.01, 41, -230], roof: [0.01, 260, 60] };
+function setCam(name) {
+  const [x, y, z] = CAMS[name];
+  camera.position.set(x, y, z);
+  controls.target.set(0, 41, 0);
+  controls.update();
+}
+
+function show(v) {
+  for (const b of document.querySelectorAll(".switch button")) b.setAttribute("aria-pressed", String(b.dataset.v === v));
+  const d = VARIANTS[v];
+  document.getElementById("spec").innerHTML =
+    `<div><span class="k">Qué cambia</span><span class="note">${d.text}</span></div>` +
+    `<div><span class="k">Peso macizo estimado</span><span class="v">${d.weight}</span></div>` +
+    `<div><span class="k">Orientación de impresión</span><span class="note">${d.print}</span></div>`;
+  document.getElementById("renders").innerHTML = RENDERS[v].map(([src, cap]) =>
+    `<figure><img src="${src}" alt="${cap}" loading="lazy"><figcaption>${cap}</figcaption></figure>`).join("");
+  try { localStorage.setItem("cubo-variant", v); } catch (e) {}
+  const use = (obj) => { if (current) scene.remove(current); current = obj; scene.add(obj); statusEl.hidden = true; };
+  if (cache[v]) return use(cache[v]);
+  statusEl.hidden = false; statusEl.textContent = "Cargando modelo…";
+  loader.load(d.file, (gltf) => {
+    gltf.scene.traverse((o) => { if (o.isMesh) o.material = steel; });
+    cache[v] = gltf.scene; use(gltf.scene);
+  }, undefined, () => { statusEl.textContent = "No se pudo cargar el modelo. Recargá la página."; });
+}
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) {
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+}
+function loop() { resize(); controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); }
+
+document.querySelectorAll(".switch button").forEach((b) => b.addEventListener("click", () => show(b.dataset.v)));
+document.querySelectorAll(".views button").forEach((b) => b.addEventListener("click", () => setCam(b.dataset.cam)));
+let start = "calado";
+try { start = localStorage.getItem("cubo-variant") || "calado"; } catch (e) {}
+if (!VARIANTS[start]) start = "calado";
+setCam("tq"); show(start); loop();
+</script>
+
+</body>
+</html>
