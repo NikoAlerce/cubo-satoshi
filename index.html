@@ -145,6 +145,12 @@ img { max-width: 100%; }
 .compare-grid { display: grid; gap: 28px; }
 @media (min-width: 900px) { .compare-grid { grid-template-columns: 1fr 1fr; } }
 .wrap.first { padding-top: 8px; padding-bottom: 40px; }
+.test { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; justify-content: space-between; padding: 16px 18px;
+  border: 1px dashed var(--accent); background: rgba(247,147,26,.05); }
+.test-txt { display: grid; gap: 4px; flex: 1 1 420px; min-width: 0; }
+.test-txt strong { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: .03em; text-transform: uppercase; }
+.test-txt p { font-size: 14px; }
+.test-dl { display: grid; gap: 8px; }
 </style>
 </head>
 <body>
@@ -183,6 +189,17 @@ img { max-width: 100%; }
         <span class="dl-f">cubo_satoshi_15cm_sin.zip · 24 KB</span>
         <span class="dl-n">Plan B: logo y halving, sin frases</span>
       </a>
+    </div>
+    <div class="test">
+      <div class="test-txt">
+        <span class="dl-k">Antes de imprimir el cubo</span>
+        <strong>Pieza de prueba de la frase</strong>
+        <p>Un recorte de 90 × 38 mm de la cara de la frase a 15 cm, con las cuatro últimas líneas y la firma: ahí están la W, la N y la M, que tienen los trazos más finos (0.7 mm). Se imprime en plano, con las letras hacia arriba, igual que la placa entera. Ajustes sugeridos: generador de paredes Arachne, capas de 0.12 mm y sin planchado (ironing), que puede cerrar las letras.</p>
+      </div>
+      <div class="test-dl">
+        <a class="dl" href="stl/15cm/prueba/prueba_frase_calado.stl" download>prueba_frase_calado.stl</a>
+        <a class="dl" href="stl/15cm/prueba/prueba_frase_relieve.stl" download>prueba_frase_relieve.stl</a>
+      </div>
     </div>
     <div class="spec" id="spec"></div>
   </section>
