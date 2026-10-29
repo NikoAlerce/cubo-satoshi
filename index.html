@@ -144,6 +144,7 @@ img { max-width: 100%; }
 .cmp figcaption ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-family: var(--body); font-size: 14px; color: var(--muted); }
 .compare-grid { display: grid; gap: 28px; }
 @media (min-width: 900px) { .compare-grid { grid-template-columns: 1fr 1fr; } }
+.wrap.first { padding-top: 8px; padding-bottom: 40px; }
 </style>
 </head>
 <body>
@@ -153,8 +154,38 @@ img { max-width: 100%; }
   <div class="hero-in">
     <span class="eyebrow">Somos Génesis · Monumento a Satoshi Nakamoto · souvenir impreso en 3D</span>
     <h1>Cubo Satoshi</h1>
-    <p>La réplica del cubo de acero del monumento, a 15 cm y en cuatro piezas que se imprimen sin soportes. Girá el modelo, desarmalo y mirá cómo va cada pieza en la impresora.</p>
+    <p>La réplica del cubo de acero del monumento, a 15 cm y en cuatro piezas que se imprimen sin soportes. Abajo están los archivos para imprimir y el modelo en 3D: girálo, desarmalo y mirá cómo va cada pieza en la impresora.</p>
   </div>
+</div>
+
+<div class="wrap first">
+  <section class="section" aria-label="Descargas">
+    <div class="sec-head">
+      <h2>Archivos para imprimir</h2>
+      <p>Cada zip trae las cuatro piezas ya orientadas para la cama, el cubo armado de referencia y una nota de armado. Ninguna pieza lleva soporte: el cuerpo se imprime parado sobre el piso, la cara de la frase y el techo van en plano con las letras hacia arriba, y la base es una placa plana.</p>
+    </div>
+    <div class="downloads">
+      <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_calado.zip" download>
+        <span class="dl-k">Versión 1</span>
+        <span class="dl-t">Letras caladas</span>
+        <span class="dl-f">cubo_satoshi_15cm_calado.zip · 1.5 MB</span>
+        <span class="dl-n">Frase: letras de 4.4 mm, trazos de 0.7 a 0.85 mm</span>
+      </a>
+      <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_relieve.zip" download>
+        <span class="dl-k">Versión 2</span>
+        <span class="dl-t">Letras en relieve</span>
+        <span class="dl-f">cubo_satoshi_15cm_relieve.zip · 1.5 MB</span>
+        <span class="dl-n">Las letras salen 1.5 mm, también sin soporte</span>
+      </a>
+      <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_sin.zip" download>
+        <span class="dl-k">Versión 3</span>
+        <span class="dl-t">Sin letras</span>
+        <span class="dl-f">cubo_satoshi_15cm_sin.zip · 24 KB</span>
+        <span class="dl-n">Plan B: logo y halving, sin frases</span>
+      </a>
+    </div>
+    <div class="spec" id="spec"></div>
+  </section>
 </div>
 
 <section class="viewer" aria-label="Visor 3D">
@@ -191,33 +222,7 @@ img { max-width: 100%; }
 </section>
 
 <div class="wrap">
-  <section class="section" aria-label="Descargas">
-    <div class="sec-head">
-      <h2>Archivos para imprimir</h2>
-      <p>Cada zip trae las cuatro piezas ya orientadas para la cama, el cubo armado de referencia y una nota de armado. Ninguna pieza lleva soporte: el cuerpo se imprime parado sobre el piso, la cara de la frase y el techo van en plano con las letras hacia arriba, y la base es una placa plana.</p>
-    </div>
-    <div class="downloads">
-      <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_calado.zip" download>
-        <span class="dl-k">Versión 1</span>
-        <span class="dl-t">Letras caladas</span>
-        <span class="dl-f">cubo_satoshi_15cm_calado.zip · 1.5 MB</span>
-        <span class="dl-n">Frase: letras de 4.4 mm, trazo de 0.85 mm</span>
-      </a>
-      <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_relieve.zip" download>
-        <span class="dl-k">Versión 2</span>
-        <span class="dl-t">Letras en relieve</span>
-        <span class="dl-f">cubo_satoshi_15cm_relieve.zip · 1.5 MB</span>
-        <span class="dl-n">Las letras salen 1.5 mm, también sin soporte</span>
-      </a>
-      <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_sin.zip" download>
-        <span class="dl-k">Versión 3</span>
-        <span class="dl-t">Sin letras</span>
-        <span class="dl-f">cubo_satoshi_15cm_sin.zip · 24 KB</span>
-        <span class="dl-n">Plan B: logo y halving, sin frases</span>
-      </a>
-    </div>
-    <div class="spec" id="spec"></div>
-  </section>
+
 
   <section class="section" aria-label="Medidas">
     <div class="sec-head">
@@ -226,7 +231,7 @@ img { max-width: 100%; }
     </div>
     <ul class="checks">
       <li><span class="pill ok">Cubo</span><span>150 × 150 mm y 155.6 mm de alto con la base. Paredes de 5.6 mm y calados de 1.5 mm de profundidad.</span></li>
-      <li><span class="pill warn">Letras</span><span>Tipografía Bahnschrift Bold, la misma en la frase, la firma y el techo. Frase y firma: letras de 4.35 mm con trazo de 0.85 mm, al tamaño del monumento. Techo: letras de 9.9 a 11 mm con trazo de 1.9 a 2.2 mm. El trazo de la frase pasa el mínimo de 0.8 mm para pico de 0.4, pero la altura de letra queda un poco por debajo de los 5 a 6 mm que recomiendan las guías: conviene probar esa placa primero.</span></li>
+      <li><span class="pill warn">Letras</span><span>Tipografía Bahnschrift Bold, la misma en la frase, la firma y el techo. Frase y firma, al tamaño del monumento: letras de 4.35 mm. Medido cortando la placa, los palos tienen 0.85 mm y las diagonales de la M, la N y la W 0.7 mm, un poco por debajo de los 0.8 mm que recomiendan las guías para pico de 0.4, igual que la altura de letra (piden 5 a 6 mm). Conviene probar esa placa primero. Techo: letras de 9.9 a 11 mm con trazo de 1.9 a 2.2 mm.</span></li>
       <li><span class="pill ok">Logo</span><span>49.5 mm de ancho, trazos de 2.6 mm o más y cortes de 1.5 a 1.9 mm. Líneas del halving de 1.5 mm de ancho.</span></li>
       <li><span class="pill ok">Piezas</span><span>Cuerpo 150 × 144.4 × 144.4 mm. Cara de la frase 150 × 144.4 mm y techo 150 × 150 mm, placas de 5.6 mm (7.1 mm en relieve). Base 135 × 135 × 5.6 mm. Las cuatro son mallas cerradas y suman exactamente el volumen del cubo entero.</span></li>
       <li><span class="pill ok">Puentes</span><span>Los únicos tramos en el aire son los techitos de las líneas del halving en las paredes del cuerpo, de 1.5 mm de ancho.</span></li>
