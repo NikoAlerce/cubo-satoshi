@@ -514,6 +514,34 @@ function shadowReach(r) {
   key.shadow.camera.updateProjectionMatrix();
 }
 
+// Where the pieces sit in a given state, in world space (beds included when printing).
+function poseBox(state) {
+  const box = new THREE.Box3(), m = new THREE.Matrix4(), sc = new THREE.Vector3().setScalar(PIECE_SCALE);
+  for (const it of pieceSet.items) {
+    const g = it.holder.children[0].geometry;
+    if (!g.boundingBox) g.computeBoundingBox();
+    m.compose(it.poses[state].p.clone().multiplyScalar(PIECE_SCALE), it.poses[state].q, sc);
+    box.union(g.boundingBox.clone().applyMatrix4(m));
+    if (state === "imprimir") {
+      box.expandByPoint(new THREE.Vector3(BED_X[it.n - 1] - 95, 0, -95).multiplyScalar(PIECE_SCALE));
+      box.expandByPoint(new THREE.Vector3(BED_X[it.n - 1] + 95, 1, 95).multiplyScalar(PIECE_SCALE));
+    }
+  }
+  return box;
+}
+// Camera for a state: the preset's viewing direction, pulled back until everything fits the frame.
+function fitCam(state) {
+  const c = PIECE_CAMS[state];
+  const dir = new THREE.Vector3(...c.p).sub(new THREE.Vector3(...c.t)).normalize();
+  const sphere = poseBox(state).getBoundingSphere(new THREE.Sphere());
+  const v = THREE.MathUtils.degToRad(camera.fov);
+  const h = 2 * Math.atan(Math.tan(v / 2) * camera.aspect);
+  const dist = sphere.radius / Math.sin(Math.min(v, h) / 2) * (state === "armado" ? 1.15 : 0.95);
+  // Aim a little below the centre so the pieces sit above the buttons along the bottom edge.
+  const t = sphere.center.clone().add(new THREE.Vector3(0, -0.14 * sphere.radius, 0));
+  return { p: t.clone().addScaledVector(dir, dist), t };
+}
+
 const ease = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -524,9 +552,8 @@ function goPieces(state, ms = 1500) {
   if (reduceMotion) ms = 0;
   shadowReach(state === "imprimir" ? 260 : state === "desarmado" ? 110 : 75);
   const from = pieceSet.items.map((it) => ({ p: it.holder.position.clone(), q: it.holder.quaternion.clone() }));
-  const cam = PIECE_CAMS[state];
   const camFrom = { p: camera.position.clone(), t: controls.target.clone() };
-  const camTo = { p: new THREE.Vector3(...cam.p), t: new THREE.Vector3(...cam.t) };
+  const camTo = fitCam(state);
   const bedFrom = bedMat.opacity, bedTo = state === "imprimir" ? 1 : 0;
   return new Promise((done) => {
     anim = {
@@ -595,6 +622,9 @@ function loadPieces(v) {
       intro = false;
       pieceState = "armado"; updatePieceUI();
       placePieces("armado");
+      resize();
+      const f = fitCam("armado");
+      camera.position.copy(f.p); controls.target.copy(f.t);
       setTimeout(playAll, reduceMotion ? 0 : 900);
       return;
     }
@@ -619,8 +649,9 @@ function setMode(m) {
   if (pieceSet) pieceSet.items.forEach((it) => (it.label.hidden = true));
   if (m === "piezas") {
     pieceState = "armado"; updatePieceUI();
-    const c = PIECE_CAMS.armado;
-    camera.position.set(...c.p); controls.target.set(...c.t); shadowReach(75);
+    if (pieceSet) { const f = fitCam("armado"); camera.position.copy(f.p); controls.target.copy(f.t); }
+    else { const c = PIECE_CAMS.armado; camera.position.set(...c.p); controls.target.set(...c.t); }
+    shadowReach(75);
   } else {
     shadowReach(75); setCam("tq");
   }
