@@ -537,8 +537,10 @@ function goPieces(state, ms = 1500) {
           it.holder.position.lerpVectors(from[i].p, it.poses[state].p, e);
           it.holder.quaternion.copy(from[i].q).slerp(it.poses[state].q, e);
         });
-        camera.position.lerpVectors(camFrom.p, camTo.p, e);
-        controls.target.lerpVectors(camFrom.t, camTo.t, e);
+        if (!this.freeCam) {  // the viewer grabbed the camera: let the pieces finish, not the camera
+          camera.position.lerpVectors(camFrom.p, camTo.p, e);
+          controls.target.lerpVectors(camFrom.t, camTo.t, e);
+        }
         bedMat.opacity = bedFrom + (bedTo - bedFrom) * e;
       },
       done,
@@ -625,15 +627,28 @@ function setMode(m) {
   show(currentVariant);
 }
 
-async function playAll() {
+// "Ver todo" runs the whole sequence in a loop until the viewer takes over (a button, a drag).
+let looping = false, loopToken = 0;
+function stopLoop() {
+  looping = false; loopToken++;
   const btn = document.getElementById("p-play");
-  btn.disabled = true;
+  btn.textContent = "▶ Ver todo"; btn.setAttribute("aria-pressed", "false");
+}
+async function playAll() {
+  if (looping) return stopLoop();
+  looping = true;
+  const token = ++loopToken, alive = () => looping && token === loopToken;
+  const btn = document.getElementById("p-play");
+  btn.textContent = "■ Pausar"; btn.setAttribute("aria-pressed", "true");
   const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
-  for (const s of ["armado", "desarmado", "imprimir", "desarmado", "armado"]) {
-    await goPieces(s, 1600);
-    await wait(s === "imprimir" ? 2600 : 1100);
+  while (alive()) {
+    for (const st of ["desarmado", "imprimir", "desarmado", "armado"]) {
+      await goPieces(st, 1600);
+      if (!alive()) return;
+      await wait(st === "imprimir" ? 2600 : st === "armado" ? 1600 : 1100);
+      if (!alive()) return;
+    }
   }
-  btn.disabled = false;
 }
 
 function resize() {
@@ -648,8 +663,9 @@ function loop(now) { resize(); tickAnim(now || performance.now()); controls.upda
 
 document.querySelectorAll("#variants button").forEach((b) => b.addEventListener("click", () => show(b.dataset.v)));
 document.querySelectorAll("#cviews button").forEach((b) => b.addEventListener("click", () => setCam(b.dataset.cam)));
-document.querySelectorAll("#modes button").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.m)));
-document.querySelectorAll("#pviews button[data-state]").forEach((b) => b.addEventListener("click", () => goPieces(b.dataset.state)));
+document.querySelectorAll("#modes button").forEach((b) => b.addEventListener("click", () => { stopLoop(); setMode(b.dataset.m); }));
+document.querySelectorAll("#pviews button[data-state]").forEach((b) => b.addEventListener("click", () => { stopLoop(); goPieces(b.dataset.state); }));
+controls.addEventListener("start", () => { if (looping) stopLoop(); if (anim) anim.freeCam = true; });
 document.getElementById("p-play").addEventListener("click", playAll);
 let start = "calado";
 try { start = localStorage.getItem("cubo-variant") || "calado"; } catch (e) {}
