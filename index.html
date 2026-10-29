@@ -194,6 +194,7 @@ img { max-width: 100%; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script>
 const VARIANTS = {
   calado: { file: "calado.json", weight: "Hasta 129 g en PLA (120 g en resina), si va 100 % relleno",
@@ -218,29 +219,30 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 1.1;
 renderer.physicallyCorrectLights = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b0c0e);
-// Soft studio room for the steel to reflect: without it, metal renders as flat dark grey.
+scene.background = new THREE.Color(0x000000);
 const pmrem = new THREE.PMREMGenerator(renderer);
-// Product-photo studio for the mirror steel to reflect: a dark room with big soft boxes.
+// Studio like the monument video: a black room lit by a few narrow light strips. Polished steel
+// mirrors them as bright streaks running across otherwise mid-grey faces.
 function studio() {
   const env = new THREE.Scene();
   env.add(new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100),
-    new THREE.MeshBasicMaterial({ color: 0x15161a, side: THREE.BackSide })));
-  const panel = (w, h, pos, intensity) => {
+    new THREE.MeshBasicMaterial({ color: 0x060607, side: THREE.BackSide })));
+  const strip = (w, h, pos, intensity) => {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
       new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 1, 1).multiplyScalar(intensity), side: THREE.DoubleSide }));
     m.position.set(...pos); m.lookAt(0, 0, 0); env.add(m);
   };
-  panel(50, 50, [0, 49, 0], 0.55);      // overhead soft box
-  panel(10, 70, [-49, 5, 10], 1.6);    // tall strip, left
-  panel(10, 70, [49, 5, -10], 1.1);    // tall strip, right
-  panel(30, 24, [-25, 10, 49], 0.9);   // key box, front left
-  panel(30, 24, [25, 10, -49], 0.5);   // back fill
-  panel(100, 8, [0, -30, 49], 0.3);    // low bounce card
-  return pmrem.fromScene(env, 0.02).texture;
+  strip(6, 90, [-49, 0, 18], 2.6);     // tall strip, front left
+  strip(5, 90, [49, 0, -22], 1.8);     // tall strip, back right
+  strip(90, 5, [0, 49, -10], 1.3);     // long strip overhead
+  strip(18, 50, [-28, 8, 49], 1.1);    // small box, front left
+  strip(30, 4, [20, -20, 49], 0.6);    // low kicker, front right
+  return pmrem.fromScene(env, 0.012).texture;
 }
 scene.environment = studio();
 const camera = new THREE.PerspectiveCamera(30, 1.6, 1, 2000);
@@ -250,15 +252,34 @@ controls.target.set(0, 41, 0);
 controls.minDistance = 60; controls.maxDistance = 600;
 controls.maxPolarAngle = Math.PI * 0.53;
 
-// A raking key from high left draws the edges of every groove; a cool rim separates the cube from the dark.
-const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-200, 260, 160); scene.add(key);
-const rim = new THREE.DirectionalLight(0xc8d6ff, 1.2); rim.position.set(240, 160, -220); scene.add(rim);
-scene.add(new THREE.HemisphereLight(0xdde3ea, 0x0c0d10, 0.35));
+// Raking key light that follows the camera from high on the viewer's left, so whatever face you
+// look at is lit at a grazing angle: it casts a shadow inside every engraving and beside every
+// raised letter, which is what makes them read, as in the video. A soft rim fills the far side.
+const key = new THREE.DirectionalLight(0xffffff, 3.2);
+key.castShadow = true;
+key.shadow.mapSize.set(4096, 4096);
+Object.assign(key.shadow.camera, { left: -75, right: 75, top: 75, bottom: -75, near: 10, far: 900 });
+key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+key.target.position.set(0, 41, 0);
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight(0xdfe7ff, 0.7); rim.position.set(240, 160, -220); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xe6ebf2, 0x050506, 0.25));
+const _right = new THREE.Vector3(), _fwd = new THREE.Vector3();
+function aimKey() {
+  _fwd.subVectors(controls.target, camera.position).normalize();
+  _right.crossVectors(_fwd, camera.up).normalize();
+  key.position.copy(controls.target)
+    .addScaledVector(_right, -260).addScaledVector(camera.up, 260).addScaledVector(_fwd, -170);
+}
 
-// Floor: dark lacquer with a soft contact shadow, as in the monument video.
-const floor = new THREE.Mesh(new THREE.CircleGeometry(600, 96),
-  new THREE.MeshStandardMaterial({ color: 0x08090b, roughness: 0.22, metalness: 0.0 }));
-floor.rotation.x = -Math.PI / 2; scene.add(floor);
+// Floor: black gloss that mirrors the cube, dimmed so the reflection reads soft, as in the video.
+const mirror = new THREE.Reflector(new THREE.CircleGeometry(600, 96), {
+  color: 0x8a8a8a, clipBias: 0.003,
+  textureWidth: Math.min(2048, innerWidth * devicePixelRatio), textureHeight: Math.min(2048, innerHeight * devicePixelRatio) });
+mirror.rotation.x = -Math.PI / 2; scene.add(mirror);
+const tint = new THREE.Mesh(new THREE.CircleGeometry(600, 96),
+  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.72, depthWrite: false }));
+tint.rotation.x = -Math.PI / 2; tint.position.y = 0.02; scene.add(tint);
 function radialTexture(stops) {
   const c = document.createElement("canvas"); c.width = c.height = 256;
   const g = c.getContext("2d"), grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
@@ -266,69 +287,55 @@ function radialTexture(stops) {
   g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
   return new THREE.CanvasTexture(c);
 }
-const shadow = new THREE.Mesh(new THREE.PlaneGeometry(150, 150), new THREE.MeshBasicMaterial({
-  map: radialTexture([[0, "rgba(0,0,0,0.85)"], [0.45, "rgba(0,0,0,0.5)"], [1, "rgba(0,0,0,0)"]]), transparent: true, depthWrite: false }));
-shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.05; scene.add(shadow);
 // The light strip under the floating cube.
 const halo = new THREE.Mesh(new THREE.PlaneGeometry(130, 130), new THREE.MeshBasicMaterial({
-  map: radialTexture([[0, "rgba(247,147,26,0.55)"], [0.38, "rgba(247,147,26,0.25)"], [0.7, "rgba(247,147,26,0)"]]),
+  map: radialTexture([[0, "rgba(247,147,26,0.45)"], [0.38, "rgba(247,147,26,0.2)"], [0.7, "rgba(247,147,26,0)"]]),
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
 halo.rotation.x = -Math.PI / 2; halo.position.y = 0.1; scene.add(halo);
 
-// Brushed finish: fine horizontal streaks, used as colour and roughness.
-function brushedTexture() {
+// Brushed finish: horizontal streaks. A soft one tints the colour; a stronger one varies the
+// roughness, so the brushing shows up inside the light streaks the way it does on real steel.
+function streaks(base, lo, span, alpha) {
   const c = document.createElement("canvas"); c.width = c.height = 1024;
   const g = c.getContext("2d");
-  g.fillStyle = "#d4d4d4"; g.fillRect(0, 0, 1024, 1024);
-  for (let i = 0; i < 5000; i++) {
-    const y = Math.random() * 1024, v = 196 + Math.random() * 44 | 0;
-    g.strokeStyle = `rgba(${v},${v},${v},${0.08 + Math.random() * 0.17})`;
-    g.lineWidth = Math.random() < 0.9 ? 1 : 2;
-    const x = Math.random() * 1024, len = 200 + Math.random() * 900;
+  g.fillStyle = base; g.fillRect(0, 0, 1024, 1024);
+  for (let i = 0; i < 6000; i++) {
+    const y = Math.random() * 1024, v = lo + Math.random() * span | 0;
+    g.strokeStyle = `rgba(${v},${v},${v},${alpha * (0.4 + Math.random() * 0.6)})`;
+    g.lineWidth = Math.random() < 0.85 ? 1 : 2;
+    const x = Math.random() * 1024, len = 150 + Math.random() * 900;
     g.beginPath(); g.moveTo(x - len / 2, y); g.lineTo(x + len / 2, y); g.stroke();
   }
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return t;
 }
-const brushed = brushedTexture();
 const steel = new THREE.MeshStandardMaterial({
-  color: 0xffffff, vertexColors: true, metalness: 1.0, roughness: 0.07,
-  map: brushed, roughnessMap: brushed, envMapIntensity: 1.0 });
+  color: 0xffffff, vertexColors: true, metalness: 0.72, roughness: 0.36,
+  map: streaks("#dedede", 205, 45, 0.2), roughnessMap: streaks("#c0c0c0", 165, 70, 0.3), envMapIntensity: 1.1 });
 
-// Box-project UVs so the brushing runs horizontally on every face, and paint whatever sits
-// inside an engraving (0.03–1.2 mm under a face of the cube) almost black, like the monument.
-const H = 40, TOP = 83, STEEL = [0.95, 0.96, 0.97], RECESS = [0.04, 0.04, 0.045];
+// Box-project UVs so the brushing runs horizontally on every face. The engravings keep the
+// same steel: their depth reads from light and shadow only, as on the monument.
 function prepare(mesh) {
   const g = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
   const pos = g.attributes.position, n = pos.count;
-  const uv = new Float32Array(n * 2), col = new Float32Array(n * 3);
+  const uv = new Float32Array(n * 2), col = new Float32Array(n * 3).fill(0.86);
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
   const ab = new THREE.Vector3(), cb = new THREE.Vector3();
   for (let i = 0; i < n; i += 3) {
     a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2);
     const nrm = cb.subVectors(c, b).cross(ab.subVectors(a, b)).normalize();
-    // Depth of each corner under each outer face (x sides, z sides, roof). A triangle is in an
-    // engraving when all three corners sit within 1.2 mm under the same face and it is not on it.
-    const depths = (p) => [H - Math.abs(p.x), H - Math.abs(p.z), TOP - p.y];
-    const da = depths(a), db = depths(b), dc = depths(c);
-    const minY = Math.min(a.y, b.y, c.y);
-    const inGroove = minY > 3.5 && [0, 1, 2].some((k) => {
-      const ds = [da[k], db[k], dc[k]];
-      return ds.every((d) => d > -0.03 && d < 1.2) && Math.max(...ds) > 0.03;
-    });
-    const rgb = inGroove ? RECESS : STEEL;
     const ax = Math.abs(nrm.x), ay = Math.abs(nrm.y), az = Math.abs(nrm.z);
     for (const [k, p] of [[i, a], [i + 1, b], [i + 2, c]]) {
       const [u, v] = ay > ax && ay > az ? [p.x, p.z] : ax > az ? [p.z, p.y] : [p.x, p.y];
       uv[k * 2] = u / 80; uv[k * 2 + 1] = v / 80;
-      col.set(rgb, k * 3);
     }
   }
   g.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
   g.setAttribute("color", new THREE.BufferAttribute(col, 3));
   mesh.geometry = g;
   mesh.material = steel;
+  mesh.castShadow = mesh.receiveShadow = true;
 }
 
 const loader = new THREE.GLTFLoader();
@@ -369,7 +376,7 @@ function resize() {
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
   }
 }
-function loop() { resize(); controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); }
+function loop() { resize(); controls.update(); aimKey(); renderer.render(scene, camera); requestAnimationFrame(loop); }
 
 document.querySelectorAll(".switch button").forEach((b) => b.addEventListener("click", () => show(b.dataset.v)));
 document.querySelectorAll(".views button").forEach((b) => b.addEventListener("click", () => setCam(b.dataset.cam)));
