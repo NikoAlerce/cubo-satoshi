@@ -90,6 +90,14 @@ img { max-width: 100%; }
 .dg-t { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
 .pill.bad { color: #ff6b5e; }
 .note a { color: var(--fg); }
+.switchrow { display: flex; flex-wrap: wrap; gap: 12px; }
+.plabel { position: absolute; transform: translate(-50%, -100%); white-space: pre; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--fg);
+  background: rgba(11,12,14,.78); border: 1px solid var(--line); padding: 3px 7px; pointer-events: none; }
+.plabel.below { transform: translate(-50%, 0); }
+.views .play { border-color: var(--accent); color: var(--accent); }
+.views button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.views button:disabled { opacity: .5; cursor: default; }
+.pnote { color: var(--fg); font-size: 14px; min-height: 1.5em; }
 </style>
 </head>
 <body>
@@ -179,22 +187,35 @@ img { max-width: 100%; }
   </section>
 
   <section class="section" aria-label="Visor 3D">
-    <div class="switch" role="group" aria-label="Variante">
+    <div class="switchrow">
+    <div class="switch" id="modes" role="group" aria-label="Qué ver">
+      <button id="m-cubo" data-m="cubo" aria-pressed="true">Cubo entero</button>
+      <button id="m-piezas" data-m="piezas" aria-pressed="false">Piezas 15 cm</button>
+    </div>
+    <div class="switch" id="variants" role="group" aria-label="Variante">
       <button id="v-calado" data-v="calado" aria-pressed="true">Letras caladas</button>
       <button id="v-relieve" data-v="relieve" aria-pressed="false">Letras en relieve</button>
       <button id="v-sin" data-v="sin" aria-pressed="false">Sin letras</button>
     </div>
+    </div>
     <div class="stage">
       <canvas id="c"></canvas>
-      <div class="views" role="group" aria-label="Vista">
+      <div class="views" id="cviews" role="group" aria-label="Vista">
         <button id="cam-tq" data-cam="tq">3/4</button>
         <button id="cam-logo" data-cam="logo">Logo</button>
         <button id="cam-quote" data-cam="quote">Frase</button>
         <button id="cam-roof" data-cam="roof">Techo</button>
       </div>
+      <div class="views" id="pviews" role="group" aria-label="Piezas" hidden>
+        <button id="p-armado" data-state="armado" aria-pressed="true">Armado</button>
+        <button id="p-desarmado" data-state="desarmado" aria-pressed="false">Desarmado</button>
+        <button id="p-imprimir" data-state="imprimir" aria-pressed="false">Cómo se imprime</button>
+        <button id="p-play" class="play">▶ Ver todo</button>
+      </div>
       <div class="status" id="status">Cargando modelo…</div>
-      <span class="hint">80 × 80 × 83 mm · acero cepillado simulado</span>
+      <span class="hint" id="hint">80 × 80 × 83 mm · acero cepillado simulado</span>
     </div>
+    <p class="pnote" id="pnote" hidden></p>
     <div class="halo" aria-hidden="true"></div>
     <div class="spec" id="spec"></div>
   </section>
@@ -387,7 +408,8 @@ function setCam(name) {
 }
 
 function show(v) {
-  for (const b of document.querySelectorAll(".switch button")) b.setAttribute("aria-pressed", String(b.dataset.v === v));
+  currentVariant = v;
+  for (const b of document.querySelectorAll("#variants button")) b.setAttribute("aria-pressed", String(b.dataset.v === v));
   const d = VARIANTS[v];
   document.getElementById("spec").innerHTML =
     `<div><span class="k">Qué cambia</span><span class="note">${d.text}</span></div>` +
@@ -396,13 +418,211 @@ function show(v) {
   document.getElementById("renders").innerHTML = RENDERS[v].map(([src, cap]) =>
     `<figure><img src="${src}" alt="${cap}" loading="lazy"><figcaption>${cap}</figcaption></figure>`).join("");
   try { localStorage.setItem("cubo-variant", v); } catch (e) {}
+  if (mode === "piezas") return loadPieces(v);
+  if (pieceSet) pieceSet.items.forEach((it) => (it.label.hidden = true));
   const use = (obj) => { if (current) scene.remove(current); current = obj; scene.add(obj); statusEl.hidden = true; };
   if (cache[v]) return use(cache[v]);
   statusEl.hidden = false; statusEl.textContent = "Cargando modelo…";
   loader.load(d.file, (gltf) => {
     gltf.scene.traverse((o) => { if (o.isMesh) prepare(o); });
-    cache[v] = gltf.scene; use(gltf.scene);
+    cache[v] = gltf.scene;
+    if (mode === "cubo" && currentVariant === v) use(gltf.scene);
   }, undefined, () => { statusEl.textContent = "No se pudo cargar el modelo. Recargá la página."; });
+}
+
+// ---- 15 cm pieces: assemble, explode and lay out for printing ---------------------------------
+// The pieces come in at their print size (mm) in their assembled place; the group shrinks them
+// to the 8 cm cube's scale so the same cameras and lights fit.
+const PIECE_SCALE = 80 / 150;
+const PIECES = [
+  { id: "1_cuerpo", name: "Cuerpo", how: "parado sobre el piso", exploded: [0, 45, 0] },
+  { id: "2_cara_frase", name: "Cara de la frase", how: "en plano, letras arriba", exploded: [0, 45, -95], rot: [-Math.PI / 2, Math.PI, 0] },
+  { id: "3_techo", name: "Techo", how: "en plano, letras arriba", exploded: [0, 135, 0] },
+  { id: "4_base", name: "Base", how: "placa plana", exploded: [0, 0, 0] },
+];
+const BED_X = [-330, -110, 110, 330];
+const PIECE_CAMS = {
+  armado: { p: [140, 70, 160], t: [0, 41, 0] },
+  desarmado: { p: [300, 200, 360], t: [0, 82, 0] },
+  imprimir: { p: [0, 560, 560], t: [0, 0, 20] },
+};
+const STATE_TEXT = {
+  armado: "Las cuatro piezas armadas forman el cubo de 15 cm.",
+  desarmado: "La cara de la frase tapa todo el fondo y el techo tapa toda la parte de arriba. La base va centrada debajo del piso.",
+  imprimir: "Cada pieza en su cama, tal como viene en el archivo: ninguna lleva soporte y las letras quedan siempre hacia arriba.",
+};
+let mode = "cubo", pieceState = "armado", currentVariant = "calado";
+const pieceCache = {};
+let pieceSet = null, anim = null;
+
+function gridTexture() {
+  const c = document.createElement("canvas"); c.width = c.height = 512;
+  const g = c.getContext("2d");
+  g.fillStyle = "#1b1e22"; g.fillRect(0, 0, 512, 512);
+  g.strokeStyle = "rgba(255,255,255,0.08)"; g.lineWidth = 2;
+  for (let i = 0; i <= 512; i += 32) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 512); g.moveTo(0, i); g.lineTo(512, i); g.stroke(); }
+  return new THREE.CanvasTexture(c);
+}
+const bedMat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: gridTexture(), roughness: 0.7, metalness: 0.1, transparent: true, opacity: 0 });
+
+function buildPieces(gltf) {
+  const group = new THREE.Group();
+  group.scale.setScalar(PIECE_SCALE);
+  const items = PIECES.map((p, i) => {
+    const mesh = gltf.scene.getObjectByName(p.id);
+    prepare(mesh);
+    mesh.position.set(0, 0, 0); mesh.quaternion.identity(); mesh.scale.set(1, 1, 1);
+    const holder = new THREE.Group();
+    holder.add(mesh);
+    group.add(holder);
+    const q = p.rot ? new THREE.Quaternion().setFromEuler(new THREE.Euler(...p.rot)) : new THREE.Quaternion();
+    mesh.geometry.computeBoundingBox();
+    const bb = mesh.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(q));
+    const c = bb.getCenter(new THREE.Vector3());
+    const poses = {
+      armado: { p: new THREE.Vector3(), q: new THREE.Quaternion() },
+      desarmado: { p: new THREE.Vector3(...p.exploded), q: new THREE.Quaternion() },
+      imprimir: { p: new THREE.Vector3(BED_X[i] - c.x, 1 - bb.min.y, -c.z), q },
+    };
+    const bed = new THREE.Mesh(new THREE.BoxGeometry(190, 1, 190), bedMat);
+    bed.position.set(BED_X[i], 0.5, 0);
+    bed.receiveShadow = true;
+    group.add(bed);
+    const label = document.createElement("div");
+    label.className = "plabel";
+    label.hidden = true;
+    document.querySelector(".stage").appendChild(label);
+    return { def: p, n: i + 1, holder, poses, label };
+  });
+  return { group, items };
+}
+
+function placePieces(state) {
+  for (const it of pieceSet.items) {
+    it.holder.position.copy(it.poses[state].p);
+    it.holder.quaternion.copy(it.poses[state].q);
+  }
+  bedMat.opacity = state === "imprimir" ? 1 : 0;
+}
+
+function shadowReach(r) {
+  Object.assign(key.shadow.camera, { left: -r, right: r, top: r, bottom: -r });
+  key.shadow.camera.updateProjectionMatrix();
+}
+
+const ease = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function goPieces(state, ms = 1500) {
+  pieceState = state;
+  updatePieceUI();
+  if (!pieceSet) return Promise.resolve();
+  if (reduceMotion) ms = 0;
+  shadowReach(state === "imprimir" ? 260 : state === "desarmado" ? 110 : 75);
+  const from = pieceSet.items.map((it) => ({ p: it.holder.position.clone(), q: it.holder.quaternion.clone() }));
+  const cam = PIECE_CAMS[state];
+  const camFrom = { p: camera.position.clone(), t: controls.target.clone() };
+  const camTo = { p: new THREE.Vector3(...cam.p), t: new THREE.Vector3(...cam.t) };
+  const bedFrom = bedMat.opacity, bedTo = state === "imprimir" ? 1 : 0;
+  return new Promise((done) => {
+    anim = {
+      t0: performance.now(), ms,
+      step(k) {
+        const e = ease(k);
+        pieceSet.items.forEach((it, i) => {
+          it.holder.position.lerpVectors(from[i].p, it.poses[state].p, e);
+          it.holder.quaternion.copy(from[i].q).slerp(it.poses[state].q, e);
+        });
+        camera.position.lerpVectors(camFrom.p, camTo.p, e);
+        controls.target.lerpVectors(camFrom.t, camTo.t, e);
+        bedMat.opacity = bedFrom + (bedTo - bedFrom) * e;
+      },
+      done,
+    };
+  });
+}
+
+function tickAnim(now) {
+  if (!anim) return;
+  const k = anim.ms ? Math.min(1, (now - anim.t0) / anim.ms) : 1;
+  anim.step(k);
+  if (k === 1) { const d = anim.done; anim = null; d(); }
+}
+
+const _box = new THREE.Box3(), _v = new THREE.Vector3();
+function updateLabels() {
+  if (!pieceSet) return;
+  const show = mode === "piezas" && (pieceState !== "armado" || anim);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  for (const it of pieceSet.items) {
+    it.label.hidden = !show;
+    if (!show) continue;
+    const printing = pieceState === "imprimir" && !anim;
+    if (printing) {
+      _v.set(BED_X[it.n - 1], 0, 100).multiplyScalar(PIECE_SCALE).project(camera);  // front edge of its bed
+    } else {
+      _box.setFromObject(it.holder);
+      _v.set((_box.min.x + _box.max.x) / 2, _box.max.y, (_box.min.z + _box.max.z) / 2).project(camera);
+    }
+    it.label.style.left = `${(_v.x + 1) / 2 * w}px`;
+    it.label.style.top = `${(1 - _v.y) / 2 * h + (printing ? 10 : -8)}px`;
+    it.label.classList.toggle("below", printing);
+    const text = printing ? `${it.n}. ${it.def.name}
+${it.def.how}` : `${it.n}. ${it.def.name}`;
+    if (it.label.textContent !== text) it.label.textContent = text;
+  }
+}
+
+function updatePieceUI() {
+  for (const b of document.querySelectorAll("#pviews button[data-state]")) b.setAttribute("aria-pressed", String(b.dataset.state === pieceState));
+  const note = document.getElementById("pnote");
+  if (note) note.textContent = STATE_TEXT[pieceState];
+}
+
+function loadPieces(v) {
+  const use = (set) => {
+    if (current) scene.remove(current);
+    if (pieceSet && pieceSet !== set) pieceSet.items.forEach((it) => (it.label.hidden = true));
+    pieceSet = set; current = set.group; scene.add(set.group);
+    placePieces(pieceState);
+    statusEl.hidden = true;
+  };
+  if (pieceCache[v]) return use(pieceCache[v]);
+  statusEl.hidden = false; statusEl.textContent = "Cargando piezas…";
+  loader.load(`piezas_${v}.json`, (gltf) => {
+    pieceCache[v] = buildPieces(gltf);
+    if (mode === "piezas" && currentVariant === v) use(pieceCache[v]);
+  }, undefined, () => { statusEl.textContent = "No se pudieron cargar las piezas. Recargá la página."; });
+}
+
+function setMode(m) {
+  mode = m;
+  for (const b of document.querySelectorAll("#modes button")) b.setAttribute("aria-pressed", String(b.dataset.m === m));
+  document.getElementById("cviews").hidden = m !== "cubo";
+  document.getElementById("pviews").hidden = m !== "piezas";
+  document.getElementById("pnote").hidden = m !== "piezas";
+  document.getElementById("hint").textContent = m === "cubo"
+    ? "80 × 80 × 83 mm · acero cepillado simulado" : "Piezas a 15 cm · 150 × 150 × 155.6 mm armado";
+  if (pieceSet) pieceSet.items.forEach((it) => (it.label.hidden = true));
+  if (m === "piezas") {
+    pieceState = "armado"; updatePieceUI();
+    const c = PIECE_CAMS.armado;
+    camera.position.set(...c.p); controls.target.set(...c.t); shadowReach(75);
+  } else {
+    shadowReach(75); setCam("tq");
+  }
+  show(currentVariant);
+}
+
+async function playAll() {
+  const btn = document.getElementById("p-play");
+  btn.disabled = true;
+  const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
+  for (const s of ["armado", "desarmado", "imprimir", "desarmado", "armado"]) {
+    await goPieces(s, 1600);
+    await wait(s === "imprimir" ? 2600 : 1100);
+  }
+  btn.disabled = false;
 }
 
 function resize() {
@@ -411,13 +631,17 @@ function resize() {
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
   }
 }
-function loop() { resize(); controls.update(); aimKey(); renderer.render(scene, camera); requestAnimationFrame(loop); }
+function loop(now) { resize(); tickAnim(now || performance.now()); controls.update(); aimKey(); renderer.render(scene, camera); updateLabels(); requestAnimationFrame(loop); }
 
-document.querySelectorAll(".switch button").forEach((b) => b.addEventListener("click", () => show(b.dataset.v)));
-document.querySelectorAll(".views button").forEach((b) => b.addEventListener("click", () => setCam(b.dataset.cam)));
+document.querySelectorAll("#variants button").forEach((b) => b.addEventListener("click", () => show(b.dataset.v)));
+document.querySelectorAll("#cviews button").forEach((b) => b.addEventListener("click", () => setCam(b.dataset.cam)));
+document.querySelectorAll("#modes button").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.m)));
+document.querySelectorAll("#pviews button[data-state]").forEach((b) => b.addEventListener("click", () => goPieces(b.dataset.state)));
+document.getElementById("p-play").addEventListener("click", playAll);
 let start = "calado";
 try { start = localStorage.getItem("cubo-variant") || "calado"; } catch (e) {}
 if (!VARIANTS[start]) start = "calado";
+currentVariant = start;
 setCam("tq"); show(start); loop();
 </script>
 
