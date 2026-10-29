@@ -201,7 +201,7 @@ img { max-width: 100%; }
         <span class="dl-k">Versión 1</span>
         <span class="dl-t">Letras caladas</span>
         <span class="dl-f">cubo_satoshi_15cm_calado.zip · 1.5 MB</span>
-        <span class="dl-n">Frase: letras de 6.2 mm, trazo de 0.88 mm</span>
+        <span class="dl-n">Frase: letras de 4.4 mm, trazo de 0.85 mm</span>
       </a>
       <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_relieve.zip" download>
         <span class="dl-k">Versión 2</span>
@@ -212,7 +212,7 @@ img { max-width: 100%; }
       <a class="dlbtn" href="stl/15cm/cubo_satoshi_15cm_sin.zip" download>
         <span class="dl-k">Versión 3</span>
         <span class="dl-t">Sin letras</span>
-        <span class="dl-f">cubo_satoshi_15cm_sin.zip · 23 KB</span>
+        <span class="dl-f">cubo_satoshi_15cm_sin.zip · 24 KB</span>
         <span class="dl-n">Plan B: logo y halving, sin frases</span>
       </a>
     </div>
@@ -226,7 +226,7 @@ img { max-width: 100%; }
     </div>
     <ul class="checks">
       <li><span class="pill ok">Cubo</span><span>150 × 150 mm y 155.6 mm de alto con la base. Paredes de 5.6 mm y calados de 1.5 mm de profundidad.</span></li>
-      <li><span class="pill ok">Letras</span><span>Frase: letras de 6.2 mm con trazo de 0.88 mm. Firma: letras de 7.6 mm con trazo de 1.1 mm. Techo: letras de 15 a 17 mm con trazo de 2.2 a 2.5 mm. Todas pasan el mínimo de 0.8 mm para pico de 0.4, la frase por poco.</span></li>
+      <li><span class="pill warn">Letras</span><span>Tipografía Bahnschrift Bold, la misma en la frase, la firma y el techo. Frase y firma: letras de 4.35 mm con trazo de 0.85 mm, al tamaño del monumento. Techo: letras de 9.9 a 11 mm con trazo de 1.9 a 2.2 mm. El trazo de la frase pasa el mínimo de 0.8 mm para pico de 0.4, pero la altura de letra queda un poco por debajo de los 5 a 6 mm que recomiendan las guías: conviene probar esa placa primero.</span></li>
       <li><span class="pill ok">Logo</span><span>49.5 mm de ancho, trazos de 2.6 mm o más y cortes de 1.5 a 1.9 mm. Líneas del halving de 1.5 mm de ancho.</span></li>
       <li><span class="pill ok">Piezas</span><span>Cuerpo 150 × 144.4 × 144.4 mm. Cara de la frase 150 × 144.4 mm y techo 150 × 150 mm, placas de 5.6 mm (7.1 mm en relieve). Base 135 × 135 × 5.6 mm. Las cuatro son mallas cerradas y suman exactamente el volumen del cubo entero.</span></li>
       <li><span class="pill ok">Puentes</span><span>Los únicos tramos en el aire son los techitos de las líneas del halving en las paredes del cuerpo, de 1.5 mm de ancho.</span></li>
@@ -238,7 +238,7 @@ img { max-width: 100%; }
   <section class="section" aria-label="Fidelidad">
     <div class="sec-head">
       <h2>Fidelidad con el monumento</h2>
-      <p>La cara del modelo está deformada en perspectiva para que sus cuatro esquinas caigan justo sobre las del monumento en un frame del video. Deslizá para pasar de uno al otro, o mirá el contorno: las líneas naranjas son los calados del modelo dibujados sobre el video. Las medidas están en la escala de 8 cm; a 15 cm se multiplican por 1.875.</p>
+      <p>La cara del modelo está deformada en perspectiva para que sus cuatro esquinas caigan justo sobre las del monumento en un frame del video. Deslizá para pasar de uno al otro, o mirá el contorno: las líneas naranjas son los calados del modelo dibujados sobre el video.</p>
     </div>
     <div class="compare-grid">
     <figure class="cmp" data-name="logo">
@@ -256,7 +256,7 @@ img { max-width: 100%; }
         <span class="tag tl">Modelo</span><span class="tag tr">Monumento</span>
         <input class="cmp-range" type="range" min="0" max="100" value="50" aria-label="Deslizá para comparar modelo y monumento">
       </div>
-      <figcaption><ul><li>Logo: mismo tamaño (26.9 × 24.1 en el monumento, 26.4 × 24.1 en el modelo).</li><li>En el monumento el logo está 1.8 más a la izquierda y 1.4 más abajo (unos 3 mm a 15 cm).</li><li>La junta vertical principal del monumento está 2.8 a la izquierda del centro (unos 5 mm a 15 cm). El resto de la espiral coincide.</li></ul></figcaption>
+      <figcaption><ul><li>La espiral de halving y el tamaño del logo coinciden.</li><li>La posición exacta del logo y de la junta vertical cambia unos milímetros entre planos del propio video (no es consistente consigo mismo), así que no se movieron.</li></ul></figcaption>
     </figure>
     <figure class="cmp" data-name="frase">
       <div class="cmp-head"><h3>Cara de la frase</h3>
@@ -273,14 +273,14 @@ img { max-width: 100%; }
         <span class="tag tl">Modelo</span><span class="tag tr">Monumento</span>
         <input class="cmp-range" type="range" min="0" max="100" value="50" aria-label="Deslizá para comparar modelo y monumento">
       </div>
-      <figcaption><ul><li>Juntas: el monumento tiene dos franjas verticales, a −22 y a +27.5 del centro, y cada franja está cortada a la mitad en horizontal. El modelo solo tiene la junta de la izquierda.</li><li>La frase del monumento ocupa 43 × 23 y va centrada en el panel del medio. La del modelo ocupa 54 × 58: más del doble de alta.</li><li>La firma del monumento va abajo a la derecha, cerca de la junta derecha. La frase termina en punto: “…INSTITUTION.”</li><li>Si se copia el tamaño del monumento, a 15 cm el trazo de la frase baja a ~0.5 mm y no sale con pico de 0.4.</li></ul></figcaption>
+      <figcaption><ul><li>Corregido: las dos franjas laterales con su corte horizontal, la frase centrada en el panel del medio al tamaño del monumento (45 × 24 contra 43 × 23) y terminada en punto, y la firma alineada a la derecha.</li><li>La única diferencia que queda es la firma: en el monumento es más chica, y acá se dejó al mismo tamaño que la frase para que se pueda imprimir.</li></ul></figcaption>
     </figure>
     </div>
   </section>
 
   <details class="legacy">
     <summary>Versión anterior: 8 cm en una sola pieza</summary>
-    <p>La primera versión, a 8 cm y en una pieza. A ese tamaño la frase del whitepaper queda con trazo de 0.47 mm, por debajo del mínimo para pico de 0.4, así que solo sirve para resina o boquilla 0.2.</p>
+    <p>La primera versión, a 8 cm y en una pieza. A ese tamaño la frase del whitepaper queda con trazo de 0.45 mm, por debajo del mínimo para pico de 0.4, así que solo sirve para resina o boquilla 0.2.</p>
     <div class="downloads">
       <a class="dlbtn" href="stl/cubo_satoshi_calado_print.stl" download>
         <span class="dl-k">8 cm · versión 1</span>
@@ -307,13 +307,13 @@ img { max-width: 100%; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script>
 const VARIANTS = {
-  calado: { file: "calado.json", weight: "Hasta 852 g en PLA (790 g en resina), si va 100 % relleno",
-    text: "Las letras van grabadas 1.5 mm en la cara de la frase y en el techo. Es la opción más fiel al monumento, donde todo está calado.",
+  calado: { file: "calado.json", weight: "Hasta 854 g en PLA (792 g en resina), si va 100 % relleno",
+    text: "Las letras van grabadas 1.5 mm en la cara de la frase y en el techo, en Bahnschrift Bold. Es la opción más fiel al monumento, donde todo está calado.",
     print: "Cuatro piezas sin soporte: el cuerpo parado sobre el piso, la cara de la frase y el techo en plano con las letras hacia arriba, la base plana." },
-  relieve: { file: "relieve.json", weight: "Hasta 866 g en PLA (803 g en resina), si va 100 % relleno",
+  relieve: { file: "relieve.json", weight: "Hasta 863 g en PLA (800 g en resina), si va 100 % relleno",
     text: "Las letras sobresalen 1.5 mm. Las líneas del halving y el logo siguen calados.",
     print: "Igual que la calada: las placas con letras van en plano, con las letras hacia arriba, así que tampoco lleva soporte." },
-  sin: { file: "sin.json", weight: "Hasta 859 g en PLA (797 g en resina), si va 100 % relleno",
+  sin: { file: "sin.json", weight: "Hasta 858 g en PLA (796 g en resina), si va 100 % relleno",
     text: "Sin frases. Conserva el logo ∞/21M, la espiral de halving y las juntas. Es el plan B si las letras no salen legibles.",
     print: "Cuatro piezas sin soporte, igual que las otras dos." },
 };
