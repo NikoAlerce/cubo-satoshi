@@ -589,13 +589,11 @@ function loadPieces(v) {
     if (pieceSet && pieceSet !== set) pieceSet.items.forEach((it) => (it.label.hidden = true));
     pieceSet = set; current = set.group; scene.add(set.group);
     statusEl.hidden = true;
-    if (intro) {  // first load: start exploded and assemble
+    if (intro) {  // first load: play the whole sequence once, as "Ver todo" does
       intro = false;
-      pieceState = "desarmado"; updatePieceUI();
-      placePieces("desarmado");
-      const c = PIECE_CAMS.desarmado;
-      camera.position.set(...c.p); controls.target.set(...c.t); shadowReach(110);
-      setTimeout(() => goPieces("armado", 2400), reduceMotion ? 0 : 700);
+      pieceState = "armado"; updatePieceUI();
+      placePieces("armado");
+      setTimeout(playAll, reduceMotion ? 0 : 900);
       return;
     }
     placePieces(pieceState);
